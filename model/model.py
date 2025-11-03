@@ -1,6 +1,6 @@
+import mysql.connector
 from database.DB_connect import get_connection
 from model.automobile import Automobile
-from model.noleggio import Noleggio
 
 '''
     MODELLO: 
@@ -35,8 +35,34 @@ class Autonoleggio:
             Funzione che legge tutte le automobili nel database
             :return: una lista con tutte le automobili presenti oppure None
         """
+        conn = None
+        try:
+            conn = get_connection()#stabilisco connessione col database chiamando la funzione get_connection
+            cursor = conn.cursor()
+            query = """SELECT * FROM automobile"""
+            cursor.execute(query)
+            risultati = cursor.fetchall() #acquisisci tutti i risultati presenti nel database
 
-        # TODO
+            automobili = []
+            for riga in risultati:
+                codice = riga[0]
+                marca = riga[1]
+                modello = riga[2]
+                anno = riga[3]
+                posti = riga[4]
+                disponibile = bool(riga[5])  # 1 True, 0 False
+
+                auto = Automobile(codice, marca, modello, anno, posti, disponibile)
+                automobili.append(auto)
+
+            return automobili
+        except mysql.connector.Error as err:
+            print("Errore in get_automobili")
+            return None
+        finally:
+            if conn:
+                conn.close()
+
 
     def cerca_automobili_per_modello(self, modello) -> list[Automobile] | None:
         """
@@ -44,4 +70,33 @@ class Autonoleggio:
             :param modello: il modello dell'automobile
             :return: una lista con tutte le automobili di marca e modello indicato oppure None
         """
-        # TODO
+        conn = None
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            query = """SELECT * FROM automobile """
+             # il modello deve essere una tupla o una lista
+            cursor.execute(query)
+            risultati = cursor.fetchall()
+
+            automobili = []
+            for riga in risultati:
+                codice = riga[0]
+                marca = riga[1]
+                modello_auto = riga[2]
+                anno = riga[3]
+                posti = riga[4]
+                disponibile = bool(riga[5])
+
+
+                if modello_auto == modello:
+                    automobili.append(Automobile(codice, marca, modello, anno, posti, disponibile))#aggiungo alla lista solo le auto di quel modello
+
+            return automobili
+        except mysql.connector.Error as err:
+            print("Errore in cerca_automobili_per_modello")
+            return None
+        finally:
+            if conn:
+                conn.close()

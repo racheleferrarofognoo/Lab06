@@ -1,6 +1,5 @@
 import flet as ft
 from UI.alert import AlertManager
-
 '''
     VIEW:
     - Rappresenta l'interfaccia utente
@@ -14,6 +13,7 @@ class View:
         self.page.title = "Lab06"
         self.page.horizontal_alignment = "center"
         self.page.theme_mode = ft.ThemeMode.DARK
+
 
         # Alert
         self.alert = AlertManager(page)
@@ -63,7 +63,8 @@ class View:
         pulsante_conferma_responsabile = ft.ElevatedButton("Conferma", on_click=self.controller.conferma_responsabile)
 
         # Altri Pulsanti da implementare (es. "Mostra" e "Cerca")
-        # TODO
+        btn_mostra = ft.ElevatedButton("Mostra", on_click=self.controller.mostra_automobili)
+        btn_cerca = ft.ElevatedButton("Cerca", on_click=self.controller.cerca_automobili)
 
         # --- LAYOUT ---
         self.page.add(
@@ -82,13 +83,48 @@ class View:
             ft.Divider(),
 
             # Sezione 3
-            # TODO
+            ft.Row(controls=[ft.Text("Automobili", size=18),btn_mostra]),
+            ft.Container(content=self.lista_auto, height=200),
+            ft.Divider(),
 
             # Sezione 4
-            # TODO
+            ft.Text("Cerca Automobile", size=18),
+            ft.Row(controls=[self.input_modello_auto, btn_cerca]),
+            self.lista_auto_ricerca,
+
         )
 
     def cambia_tema(self, e):
         self.page.theme_mode = ft.ThemeMode.DARK if self.toggle_cambia_tema.value else ft.ThemeMode.LIGHT
         self.toggle_cambia_tema.label = "Tema scuro" if self.toggle_cambia_tema.value else "Tema chiaro"
         self.page.update()
+
+    #queste fnzioni verranno chiamate poi nel controller
+    def popola_lista_auto(self, automobili: list):
+        #riempie la ListView principale con oggetti automobile
+        self.lista_auto.controls.clear()
+        for a in automobili:
+            title = f"{a.marca} {a.modello}"
+            subtitle = f"Codice: {a.codice} - Anno: {a.anno} - Posti: {a.posti} - {'Disponibile' if a.disponibile else 'Noleggiata'}"
+            self.lista_auto.controls.append(ft.ListTile(title=ft.Text(title), subtitle=ft.Text(subtitle))) #aggiunge la lista alla listview
+        self.page.update()
+
+    def popola_lista_auto_ricerca(self, automobili: list):
+        #riempie la ListView dei risultati ricerca del modello
+        self.lista_auto_ricerca.controls.clear()
+        for a in automobili:
+            title = f"{a.marca} {a.modello}"
+            subtitle = f"Codice: {a.codice} - Anno: {a.anno} - Posti: {a.posti} - {'Disponibile' if a.disponibile else 'Noleggiata'}"
+            self.lista_auto_ricerca.controls.append(ft.ListTile(title=ft.Text(title), subtitle=ft.Text(subtitle)))
+        self.page.update()
+
+    def svuota_lista_auto(self):
+        #svuota la lista principale (mostra tutte le auto)
+        self.lista_auto.controls.clear()
+        self.page.update()
+
+    def svuota_lista_ricerca(self):
+        #svuota la lista dei risultati di ricerca del modello
+        self.lista_auto_ricerca.controls.clear()
+        self.page.update()
+
